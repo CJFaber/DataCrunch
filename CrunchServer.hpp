@@ -32,7 +32,7 @@ class ServerConnection : public std::enable_shared_from_this<ServerConnection>
 		void Start();
 	
 		//Server Constructor
-		ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex);
+		ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex, bool& flag);
 	private:
 		void async_read();
 		void async_write();
@@ -67,6 +67,9 @@ class ServerConnection : public std::enable_shared_from_this<ServerConnection>
 
 		//Queue of messages waiting to be sent from the server.
 		queue<vector<char>>&	server_msg_queue_;
+
+		//Ref to the finishedflag in the server class
+		bool&					server_finished_flag_;
 };	
 
 //DataCrunch Server class, listens on port and starts new sockets when requested from all IP addrs 
@@ -75,6 +78,9 @@ class CrunchServer
 	public:
 		//Loads a message into the message queue, waiting to be sent
 		void LoadData(vector<char> Msg);
+
+		//Called when there are no more messages to send
+		void PostEndMessage(void);
 
 		//Starts the io_context in a thread for the server
 		void Run(void);
@@ -96,6 +102,8 @@ class CrunchServer
 		//Holds messages to be sent to clients		
 		queue<vector<char>>			message_queue_;
 
+		bool						finished_flag_;
+		
 		//Thread and work guard for io_context
 		std::thread					server_thread_;	
 		boost::asio::executor_work_guard<boost::asio::io_context::executor_type>  server_work_;

@@ -4,6 +4,7 @@ CrunchServer::CrunchServer(void):
 	server_acceptor_(server_context_, tcp::endpoint(tcp::v4(), DC_PORT)),
 	server_work_(boost::asio::make_work_guard(server_context_))
 {
+	finished_flag_ = false;
 	server_acceptor_.set_option(boost::asio::socket_base::reuse_address(true));
 	server_acceptor_.listen();
 	StartAccept();
@@ -13,6 +14,13 @@ void CrunchServer::LoadData(vector<char> Msg)
 {
  	message_lock_.lock();	
 	message_queue_.push(Msg);
+	message_lock_.unlock();
+}
+
+void CrunchServer::PostEndMessage(void)
+{
+	message_lock_.lock();
+	finished_flag_ = true;
 	message_lock_.unlock();
 }
 
@@ -36,14 +44,15 @@ void CrunchServer::StartAccept(void)
 		[this](boost::system::error_code ec, tcp::socket server_socket)
 		{
 			if(!ec){
-				std::make_shared<ServerConnection>(std::move(server_socket), message_queue_, message_lock_)->Start();
+				std::make_shared<ServerConnection>(std::move(server_socket), message_queue_, message_lock_, finished_flag_)->Start();
 			}
 			StartAccept();
 		});
 }
 
-ServerConnection::ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex) : 
-	conn_socket_(std::move(server_socket)), server_msg_queue_(server_queue), server_lock_(mutex), Delim_('0')
+ServerConnection::ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex, bool& flag) : 
+	conn_socket_(std::move(server_socket)), server_msg_queue_(server_queue), server_lock_(mutex), Delim_('0'), 
+	server_finished_flag_(flag)
 {
 
 }
@@ -110,7 +119,8 @@ void ServerConnection::DataPost()
 	live_data_ = SafePop();
 	//std::cout<<"going to write: "<<LiveData[0]<<"\n";
 	std::vector<char> valid_buf;
-    valid_buf.push_back((live_data_.size() > 1) ? '1' : '0');
+	//Check if we are going to send anything
+	valid_buf.push_back((live_data_.size() > 1) ? '1' : '0');
     write_queue_.push(valid_buf);
     write_queue_.push(live_data_);
 	async_write();
@@ -125,7 +135,12 @@ vector<char> ServerConnection::SafePop()
 		server_msg_queue_.pop();	
 	}
 	else{
-		LiveData.push_back('0');
+		if(server_finished_flag_){
+			LiveData.push_back('f');
+		}
+		else{
+			LiveData.push_back('0');
+		}
 	}
 	server_lock_.unlock();
 	return LiveData;

@@ -22,6 +22,8 @@ int main(int argc, char *argv[])
 	std::cin.get(tst);
 	serv.LoadData(testvalue2);
 	std::cout<<"Success\n";
+	std::cout<<"setting finished flag\n";
+	serv.PostEndMessage();
 	std::cout << "enter any key to stop server\n";
 	std::cin.get(tst);
 	serv.Stop();		
