@@ -59,9 +59,17 @@ ServerConnection::ServerConnection(tcp::socket server_socket, queue<vector<char>
 
 void ServerConnection::Start()
 {
+	std::vector<char> Hello_Buf = {'H','e','l','l','o','!'};
+	std::vector<char> Valid_Buf = {'1'}; 
+	write_queue_.push(Valid_Buf);
+	write_queue_.push(Hello_Buf);
+	//async_write();
+	//Now begin
 	async_read();
 }
 
+
+//Read until we get a '0' from the client which will trigger us to send one datagram
 void ServerConnection::async_read()
 {
 	boost::asio::async_read_until(conn_socket_, streambuf, "0", 

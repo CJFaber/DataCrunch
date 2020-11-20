@@ -18,6 +18,12 @@ int main(int argc, char* argv[])
 	char ctrl;
 	CrunchClient client(argv[1], argv[2]);
 	client.Run();
+	std::cout<<"Trying to get Hello Buf...\n";
+	message = client.GetData();
+	for (auto i = message.begin(); i != message.end(); ++i){
+		std::cout << *i;
+	}
+	std::cout << std::endl;
 	while(1){
 		std::cout<<"\nStarting while loop: press enter to query for vector, or press any key followed by enter to quit\n";
 		if(std::cin.get() != '\n'){
@@ -27,6 +33,10 @@ int main(int argc, char* argv[])
 		std::cout<<"return\n";
 		if(message.empty()){
 			std::cout << "Got empty message\n" <<std::endl;
+		}
+		if(message[0] == 'f'){
+			std::cout<<"Got an f!\n";
+			break;
 		}
 		for (auto i = message.begin(); i != message.end(); ++i){
 			std::cout << *i;

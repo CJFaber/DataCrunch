@@ -50,7 +50,7 @@ void CrunchClient::StartConn(void)
 vector<char> CrunchClient::GetData(void)
 {
 		//Prepare vectors
-		socket_message_ = std::vector<char>(DC_MESSAGE_SIZE, 'X'); 	
+		//socket_message_ = std::vector<char>(DC_MESSAGE_SIZE, 'X'); 	
 		std::vector<char> ping_buf = {'0'};
 		std::vector<char> send_valid = {'X'};
 		
