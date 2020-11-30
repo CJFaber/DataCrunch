@@ -32,21 +32,24 @@ class ServerConnection : public std::enable_shared_from_this<ServerConnection>
 		void Start();
 	
 		//Server Constructor
-		ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex, bool& flag);
+		ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex, bool& flag1, bool& flag2);
 	private:
 		void async_read();
-		void async_write();
 		
+		void DataWrite();
+		void FlagWrite(vector<char>);
+		void SyncPacketWrite();	
+		void NotifyEnd();
 		//Handle for async_read function
 		void on_read(boost::system::error_code ec, std::size_t msg_len);
 		//Handle for async_write function
 		void on_write(boost::system::error_code ec, std::size_t msg_size);
 		
-		//Perpares data for async write
+		//Perpares data for async write, uses mutex on message queue
 		void DataPost();
 	
-		//Safely removes data from the shared message queue
-		vector<char> SafePop();
+		//Writes a valid/invalid/finished flag to the client
+		bool FlagPost(bool& SendOne);
 
 		//Buffer for ping packet
 		boost::asio::streambuf	streambuf;
@@ -70,6 +73,8 @@ class ServerConnection : public std::enable_shared_from_this<ServerConnection>
 
 		//Ref to the finishedflag in the server class
 		bool&					server_finished_flag_;
+
+		bool&					data_in_server_queue_;
 };	
 
 //DataCrunch Server class, listens on port and starts new sockets when requested from all IP addrs 
@@ -103,6 +108,7 @@ class CrunchServer
 		queue<vector<char>>			message_queue_;
 
 		bool						finished_flag_;
+		bool						data_in_queue_;
 		
 		//Thread and work guard for io_context
 		std::thread					server_thread_;	
