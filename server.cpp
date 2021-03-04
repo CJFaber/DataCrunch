@@ -50,10 +50,11 @@ int main(int argc, char *argv[])
 		message.resize(DC_MESSAGE_SIZE);
 		//std::cin.get(tst);
 	}
-	serv.PostEndMessage();
+
 	f.close();
-	std::cout<<"---\nfinished sending file press enter to post end messag\n---\n";
-	
+	//std::cout<<"---\nfinished sending file press any key to post end messag\n---\n";
+	//std::cin.get(tst);
+	serv.PostEndMessage();	
 	//std::cin.get(tst);
 	//serv.PostEndMessage();
 	std::cout << "Posting end message. Enter any key to stop server\n";

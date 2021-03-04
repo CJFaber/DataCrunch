@@ -4,9 +4,11 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <future>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
 
-#include <boost/thread.hpp>
+
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
@@ -32,49 +34,52 @@ class ServerConnection : public std::enable_shared_from_this<ServerConnection>
 		void Start();
 	
 		//Server Constructor
-		ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, boost::mutex& mutex, bool& flag1, bool& flag2);
+		ServerConnection(tcp::socket server_socket, queue<vector<char>>& server_queue, std::mutex& mutex, 
+							std::condition_variable& cond_var, bool& flag1);
 	private:
-		void async_read();
 		
+		//Reads ping from client
+		void ping_read();
+		
+		//Writes live_data_vector to client
 		void DataWrite();
+
+		//Writes a flag to the client given a flag vector
 		void FlagWrite(vector<char>);
-		void SyncPacketWrite();	
-		void NotifyEnd();
-		//Handle for async_read function
-		void on_read(boost::system::error_code ec, std::size_t msg_len);
-		//Handle for async_write function
-		void on_write(boost::system::error_code ec, std::size_t msg_size);
+
+		//Handle for the async read ping - Starts the message process
+		void startup_on_ping(boost::system::error_code ec, std::size_t msg_len);
 		
-		//Perpares data for async write, uses mutex on message queue
-		void DataPost();
+		//Main loop - Perpares data for async write, uses mutex and condition variable on message queue
+		void ServeData();
 	
-		//Writes a valid/invalid/finished flag to the client
-		bool FlagPost(bool& SendOne);
+		//Writes a valid/finished flag to the client
+		bool FlagPost();
 
 		//Buffer for ping packet
-		boost::asio::streambuf	streambuf;
-		//Delimiter for 
-		char					Delim_;	
+		boost::asio::streambuf		streambuf;
+
+		//Delimiter for startup_on_ping
+		char						Delim_;	
 	
 		//boost::asio socket (tcp)
-		tcp::socket 			conn_socket_;
+		tcp::socket 				conn_socket_;
 		
-		//Mutex for message queue
-		boost::mutex&			server_lock_;
-
-		//Data to be sent to client, removed from message queue or vector containing '0'
-		vector<char>			live_data_;
+		//Mutex for message 		
+		std::mutex&					server_msg_lock_;
 		
-		//Queue of messages to be written (valid message, data message)
-		queue<vector<char>>		write_queue_;
+		//Condition variable for the status of the message queue (false for empty true for has data)
+		std::condition_variable&	server_msg_sig_;
 
+		//Data to be sent to client, removed from the server message queue
+		vector<char>				live_data_;
+		
 		//Queue of messages waiting to be sent from the server.
-		queue<vector<char>>&	server_msg_queue_;
-
+		queue<vector<char>>&		server_msg_queue_;
+		
 		//Ref to the finishedflag in the server class
-		bool&					server_finished_flag_;
-
-		bool&					data_in_server_queue_;
+		bool&						server_finished_flag_;
+		bool						queue_empty_flag_;	
 };	
 
 //DataCrunch Server class, listens on port and starts new sockets when requested from all IP addrs 
@@ -101,14 +106,17 @@ class CrunchServer
 		boost::asio::io_context		server_context_;
 		tcp::acceptor				server_acceptor_;
 		
-		//Mutex for message_queue
-		boost::mutex				message_lock_;
+		//Mutex for message_queue, lock when accessing queue
+		std::mutex					message_lock_;
+
+		//Condition variable for signaling when data is in the 
+		std::condition_variable 	message_sig_;
 
 		//Holds messages to be sent to clients		
 		queue<vector<char>>			message_queue_;
 
+		//Flag denoting we are finished
 		bool						finished_flag_;
-		bool						data_in_queue_;
 		
 		//Thread and work guard for io_context
 		std::thread					server_thread_;	

@@ -30,15 +30,17 @@ class CrunchClient
 		~CrunchClient();												//Destructor
 
 		//Returns a vector of variable size from server depending on valididy ( size == DC_MESSAGE_SIZE || 1 )
+		//	Will return a vector of size one with the value 'f' if the server has finished sending data
+		//  Blocking call will put thread to sleep while waiting for data.
 		vector<char> GetData(void);
 
-		//Callback function for read returns the number of bytes read 
+		//Callback function for read returns the number of bytes read, not used at the moment 
 		std::size_t MsgBytesRead(const::boost::system::error_code ec, std::size_t bytes_read);
 		
 		//Callback function for handling read once desired number of bytes have been read
 		void ReadHandle(const::boost::system::error_code ec);
 
-		//Read a flag from the server
+		//Read and interpet a flag from the server
 		void ReadFlag(void);
 		//Read a message from the server
 		void ReadMessage(void);
@@ -50,7 +52,7 @@ class CrunchClient
 		void Stop(void);	//Stops the io_context thread and closes the socket
 		
 	private:
-		//Starts the socket connection (tcp)
+		//Starts the socket connection (tcp), calls ReadFlag in lambda
 		void StartConn(void);
 	
 		//Boost ASIO types for networking 				//ORDERING IMPORTANCE
@@ -60,12 +62,12 @@ class CrunchClient
 		tcp::socket					 client_socket_;	//
 
 		//Vector to hold socket message read from server
-		bool						 serv_finished_;
-		bool						 waiting_on_serv_;
-		unsigned int				 sleep_time_;		//Time in USec to sleep before trying to send another ping message
-		vector<char>				 socket_message_;	//Message from server (always size DC_MESSAGE_SIZE)		
+		bool						 serv_finished_;	//Flag for holding the done state of the server
+		vector<char>				 socket_message_;	//Live data from server (always size DC_MESSAGE_SIZE)		
 		vector<char>				 ping_buf_;			//Valid data flag
-		boost::mutex				 message_lock_;		//Queue Lock for pop/push messages from queue
+		
+		std::mutex					 message_lock_;		//Queue Lock for pop/push messages from queue
+		std::condition_variable		 message_sig_;		//Signal for message queue
 		queue<vector<char>>			 message_queue_;	//Message Queue of data recieved from server.
 				
 
