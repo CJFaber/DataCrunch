@@ -46,10 +46,10 @@ int main(int argc, char* argv[])
 		start_time = omp_get_wtime();
 	#endif
 	while(1){
-		//std::cout<<"\nStarting while loop: press enter to query for vector, or press any key followed by enter to quit\n";
-		//if(std::cin.get() != '\n'){
-		//	break;
-		//}
+		std::cout<<"\nStarting while loop: press enter to query for vector, or press any key followed by enter to quit\n";
+		if(std::cin.get() != '\n'){
+			break;
+		}
 		//
 		//Should go to sleep here
 		std::vector<char> message = client.GetData();

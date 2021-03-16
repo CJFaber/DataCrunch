@@ -171,7 +171,9 @@ void CrunchClient::ReadFlag(void)
 									else{
 										client_socket_.close();
 									}
-									std::cout << "Leaving ReadFlag Lambda\n";
+									#ifdef DEBUG
+										std::cout << "Leaving ReadFlag Lambda\n";
+									#endif
 								});
 }
 
