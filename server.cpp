@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 	//serv.PostEndMessage();
 	std::cout << "Posting end message. Enter any key to stop server\n";
 	std::cin.get(tst);
+	std::cout << "Stopping server\n";
 	serv.Stop();		
 	return 0;
 }

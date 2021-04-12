@@ -166,17 +166,35 @@ void ServerConnection::ServeData()
 			
 		}
 		queue_empty_flag_ = server_msg_queue_.empty();
-		live_data_ = server_msg_queue_.front();
-		server_msg_queue_.pop();
 
-		//Free lock
+	
+		//If we own the lock we must have data to send pop it and unlock the lock
+		// If we don't own the lock then we either have  AND/OR the server finished flag was set
+		// 	If the queue is not empty but the finished flag is set we won't have locked the data_wait lock
+		// 	However the same is true if the finished flag is set and the queue is empty.
+		// 	Need to have a way to make sure that the queue is not empty before poping off the front, because we still want to send
+		// 	items in the queue if they do indeed exist.
+
+		if(!queue_empty_flag_){
+			live_data_ = server_msg_queue_.front();
+			server_msg_queue_.pop();
+
+			//This seems kind of silly but I can't really think of another way to quickly relase the lock (correctly)
+			//	We either move the FlagPost function before the unlock OR we let the lock go out of scope (end of while iteration)
+			//	I would imagine that the check to see if the lock is owned is very quick (quicker than running the FlagPost funciton),
+			//	but I am uncertian. This should however work for the time being. 
+
+			if(data_wait.owns_lock()){
+				data_wait.unlock();
+			}
+		}
 		#ifdef DEBUG
 			std::cout<<"Got data from msg_queue after condition\n";
 		#endif
-		data_wait.unlock();
+
 		//Do flag write, if we return false we sent an f and are done sending data so break while loop
-		if(!FlagPost()) break;				
-		
+		if(!FlagPost()) break;					
+
 		//Write live_data_ to client with DataWrite.
 		DataWrite();
 		//Done with DataWrite
@@ -197,6 +215,9 @@ bool ServerConnection::FlagPost()
 	#endif	
 	if(server_finished_flag_ && queue_empty_flag_){	
 		LiveData[0] = 'f';
+		#ifdef DEBUG
+			std::cout << " sending a \"" << LiveData[0] << "\"\n" << std::endl;
+		#endif
 		FlagWrite(LiveData);
 		return false;
 	}

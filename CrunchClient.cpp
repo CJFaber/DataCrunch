@@ -245,7 +245,8 @@ vector<char> CrunchClient::GetData(void)
 			std::cout << "Consumer: Got past lock\n";
 		#endif
 		ret_vec = message_queue_.front();
-		message_queue_.pop();	
+		message_queue_.pop();
+		//std::cout << "message_queue_ remaining messages: " << message_queue_.size() << std::endl;	
 		//Return empty vector, Waiting on Data from server
 		return ret_vec;
 	}
