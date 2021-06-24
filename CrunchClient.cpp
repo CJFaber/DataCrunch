@@ -259,12 +259,12 @@ vector<char> CrunchClient::GetData(void)
 ////////////////////////////////////////////////////////////////
 
 inline void TimeStamp(void){
-	const std::chrono::time_point<high_resolution_clock, std::chrono::microseconds> now = 
-		std::chrono::time_point_cast<std::chrono::microseconds>(high_resolution_clock::now());
+	const std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::microseconds> now = 
+		std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now());
 	
-	const std::chrono::high_resolution_clock::duration now_since_epoch = now.time_sinece_epoch();
+	const std::chrono::high_resolution_clock::duration now_since_epoch = now.time_since_epoch();
 	
-	std::cout << duration_cast<std::chrono::microseconds>(now_since_epoch).count() << std::endl;
+	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now_since_epoch).count() << std::endl;
 }
 
 
