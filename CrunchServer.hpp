@@ -7,7 +7,9 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-
+#include <ctime>
+#include <ratio>
+#include <chrono>
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -126,5 +128,7 @@ class CrunchServer
 		
 		
 };
+
+inline void TimeStamp(void);
 
 #endif /*CRUNCH_SERVER_HPP_*/

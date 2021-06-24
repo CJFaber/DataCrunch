@@ -7,6 +7,10 @@
 #include <thread>
 #include <unistd.h>
 #include <memory>
+#include <ctime>
+#include <ratio>
+#include <chrono>
+
 
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
@@ -75,5 +79,7 @@ class CrunchClient
 		std::thread					 client_thread_;	
 		boost::asio::executor_work_guard<boost::asio::io_context::executor_type>  client_work_;
 };
+
+inline void TimeStamp(void);
 
 #endif /*CRUNCH_CLIENT_HPP_*/

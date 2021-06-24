@@ -252,5 +252,19 @@ vector<char> CrunchClient::GetData(void)
 	}
 
 
+//Time Stamp things
+//
+// Prints a time stamp to the console using std::chrono and
+// a high resolution timer in microseconds
+////////////////////////////////////////////////////////////////
+
+inline void TimeStamp(void){
+	const std::chrono::time_point<high_resolution_clock, std::chrono::microseconds> now = 
+		std::chrono::time_point_cast<std::chrono::microseconds>(high_resolution_clock::now());
+	
+	const std::chrono::high_resolution_clock::duration now_since_epoch = now.time_sinece_epoch();
+	
+	std::cout << duration_cast<std::chrono::microseconds>(now_since_epoch).count() << std::endl;
+}
 
 
