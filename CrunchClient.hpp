@@ -80,6 +80,6 @@ class CrunchClient
 		boost::asio::executor_work_guard<boost::asio::io_context::executor_type>  client_work_;
 };
 
-inline void TimeStamp(void);
+void TimeStamp(void);
 
 #endif /*CRUNCH_CLIENT_HPP_*/

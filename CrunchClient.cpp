@@ -258,7 +258,7 @@ vector<char> CrunchClient::GetData(void)
 // a high resolution timer in microseconds
 ////////////////////////////////////////////////////////////////
 
-inline void TimeStamp(void){
+void TimeStamp(void){
 	const std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::microseconds> now = 
 		std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now());
 	

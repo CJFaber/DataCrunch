@@ -129,6 +129,6 @@ class CrunchServer
 		
 };
 
-inline void TimeStamp(void);
+void TimeStamp(void);
 
 #endif /*CRUNCH_SERVER_HPP_*/
