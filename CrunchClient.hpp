@@ -80,6 +80,29 @@ class CrunchClient
 		boost::asio::executor_work_guard<boost::asio::io_context::executor_type>  client_work_;
 };
 
-void TimeStamp(void);
 
+class TimeStamp
+{
+	public:
+	//Create/Destroy
+	TimeStamp();
+	//~TimeStamp();
+
+	//Takes the current time stamp and adds it to the list
+	void Clock(void);
+
+	//Dumps out all the values of the list
+	void Dump(void);
+
+	//Find the time between two iteration points, given iteration a < iteration b
+	// Values are 0th indexed	
+	void DumpSpan(int a, int b);
+	
+	private:
+	std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::microseconds> current_step_;
+	
+	std::deque<unsigned int> 		iter_time_stamps_;
+	unsigned int					stamp_count_;
+		
+};
 #endif /*CRUNCH_CLIENT_HPP_*/

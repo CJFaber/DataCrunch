@@ -258,13 +258,43 @@ vector<char> CrunchClient::GetData(void)
 // a high resolution timer in microseconds
 ////////////////////////////////////////////////////////////////
 
-void TimeStamp(void){
+/*
+inline void TimeStamp(void){
 	const std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::microseconds> now = 
 		std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now());
 	
 	const std::chrono::high_resolution_clock::duration now_since_epoch = now.time_since_epoch();
 	
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now_since_epoch).count() << std::endl;
+}
+*/
+
+TimeStamp::TimeStamp(){
+	stamp_count_ = 0;
+}
+
+void TimeStamp::Clock(void){
+	current_step_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now());
+	iter_time_stamps_.emplace_back(std::chrono::duration_cast<std::chrono::microseconds>(current_step_.time_since_epoch()).count());
+	stamp_count_++;
+}
+
+//Values are 0th indexed
+void TimeStamp::DumpSpan(int a, int b){
+	if (a >= b || a > stamp_count_ || b > stamp_count_){
+		std::cout << "Wrong value dummy\n";
+		return;
+	}
+	std::cout << "Time between iterations" << a << "and " << b << "\n";
+	std::cout << iter_time_stamps_[b] - iter_time_stamps_[a] << std::endl;
+}
+
+void TimeStamp::Dump(void){
+	for (unsigned int each_stamp: iter_time_stamps_){
+		std::cout << each_stamp << "\n";
+	}
+	std::cout << std::endl;
+	return;
 }
 
 

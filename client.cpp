@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
  	//vector<char> message;
 	char ctrl;
 	CrunchClient client(argv[1], argv[2]);
+	TimeStamp time_stamp;
 	#ifdef DEBUG
 		std::cout << "Starting program main thread is: " 
 				  << (std::thread::id)std::this_thread::get_id()
@@ -49,10 +50,12 @@ int main(int argc, char* argv[])
 		if(std::cin.get() != '\n'){
 			//break;
 		}
+	time_stamp.Clock();
 	while(1){
 		//
 		//Should go to sleep here
 		std::vector<char> message = client.GetData();
+		time_stamp.Clock();
 		//message.shrink_to_fit();
 		#ifndef TIMING
 			int x = 0;
@@ -99,5 +102,6 @@ int main(int argc, char* argv[])
 		std::cout<<"leaving while loop\n";
 	#endif
 	client.Stop();
+	time_stamp.Dump();
   return 0;
 }
