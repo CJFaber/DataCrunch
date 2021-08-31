@@ -101,10 +101,10 @@ class TimeStamp
 	void CheckIn(void); 
 	
 	private:
-	std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::microseconds> current_step_;
-	
-	std::deque<unsigned int> 		iter_time_stamps_;
-	unsigned int					stamp_count_;
+	std::chrono::high_resolution_clock::time_point 		current_step_;
+	std::chrono::high_resolution_clock::time_point 		prev_step_;
+	std::vector<std::chrono::microseconds>        		iter_time_stamps_;
+	std::chrono::microseconds 							hold_duration_;
 		
 };
 #endif /*CRUNCH_CLIENT_HPP_*/

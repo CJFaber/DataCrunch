@@ -269,28 +269,33 @@ void TimeStamp::CheckIn(void){
 
 
 TimeStamp::TimeStamp(){
-	stamp_count_ = 0;
+	prev_step_ = std::chrono::high_resolution_clock::now();	
 }
 
 void TimeStamp::Clock(void){
-	current_step_ = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now());
-	iter_time_stamps_.emplace_back(std::chrono::duration_cast<std::chrono::microseconds>(current_step_.time_since_epoch()).count());
-	stamp_count_++;
+	current_step_ = std::chrono::high_resolution_clock::now();
+	hold_duration_ = std::chrono::duration_cast<std::chrono::microseconds>(current_step_ - prev_step_);	
+	iter_time_stamps_.push_back(hold_duration_);
+	prev_step_ = std::chrono::high_resolution_clock::now();
 }
 
 //Values are 0th indexed
 void TimeStamp::DumpSpan(int a, int b){
-	if (a >= b || a > stamp_count_ || b > stamp_count_){
+	if (a >= b || a > iter_time_stamps_.size() || b > iter_time_stamps_.size()){
 		std::cout << "Wrong value dummy\n";
 		return;
 	}
 	std::cout << "Time between iterations" << a << "and " << b << "\n";
-	std::cout << iter_time_stamps_[b] - iter_time_stamps_[a] << std::endl;
+	long long int t_time = 0;
+	for (int i = a; i < (b-a); ++i){
+		 t_time += iter_time_stamps_[i].count();
+	} 
+	std::cout << t_time << std::endl;
 }
 
 void TimeStamp::Dump(void){
-	for (unsigned int each_stamp: iter_time_stamps_){
-		std::cout << each_stamp << "\n";
+	for (auto each_stamp: iter_time_stamps_){
+		std::cout << each_stamp.count() << "\n";
 	}
 	std::cout << std::endl;
 	return;
