@@ -97,6 +97,8 @@ class TimeStamp
 	//Find the time between two iteration points, given iteration a < iteration b
 	// Values are 0th indexed	
 	void DumpSpan(int a, int b);
+
+	void CheckIn(void); 
 	
 	private:
 	std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::microseconds> current_step_;
