@@ -16,6 +16,26 @@ CrunchClient::CrunchClient(string ip_addr, string port_num):
 	StartConn();
 }
 
+//Client constructor for local reads, for testing use only
+CrunchClient::CrunchClient(char* file):
+    client_resolver_(client_context_),
+    server_endpoint_(client_resolver_.resolve("127.0.0.1", "2303")),
+    client_socket_(client_context_),
+    socket_message_(DC_MESSAGE_SIZE,0),
+    ping_buf_(1,'0'),
+    serv_finished_(false),
+    client_work_(boost::asio::make_work_guard(client_context_))
+{
+	f = fopen(file, "r");
+	if (f == NULL){
+		std::cout << "File error\n";
+		exit(1);
+	}	
+	fseek(f, 0, SEEK_END);
+	inp_size = ftello(f);
+	rewind(f);	
+}
+
 CrunchClient::~CrunchClient()
 {
 	if(!client_context_.stopped()){
@@ -249,7 +269,21 @@ vector<char> CrunchClient::GetData(void)
 		//std::cout << "message_queue_ remaining messages: " << message_queue_.size() << std::endl;	
 		//Return empty vector, Waiting on Data from server
 		return ret_vec;
+}
+
+vector<char> CrunchClient::LocalGetData(void)
+{
+	std::vector<char> ret_vec(DC_MESSAGE_SIZE, 0);
+	size_t result;
+	result = fread(ret_vec.data(), (sizeof(unsigned char)), DC_MESSAGE_SIZE, f);
+	if (result == 0){
+		ret_vec.resize(1, 'f');
+		ret_vec[0] = 'f';
+		return ret_vec;
 	}
+	return ret_vec;
+
+}
 
 
 //Time Stamp things

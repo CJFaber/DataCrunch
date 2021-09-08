@@ -31,12 +31,16 @@ class CrunchClient
 {
 	public:
 		CrunchClient(std::string ip_addr, std::string port_num);		//Constructor
+		CrunchClient(char* file);										//Constructor for local read
 		~CrunchClient();												//Destructor
 
 		//Returns a vector of variable size from server depending on valididy ( size == DC_MESSAGE_SIZE || 1 )
 		//	Will return a vector of size one with the value 'f' if the server has finished sending data
 		//  Blocking call will put thread to sleep while waiting for data.
 		vector<char> GetData(void);
+
+		//FOR LOCAL TESTING ONLY
+		vector<char> LocalGetData(void);
 
 		//Callback function for read returns the number of bytes read, not used at the moment 
 		std::size_t MsgBytesRead(const::boost::system::error_code ec, std::size_t bytes_read);
@@ -78,6 +82,12 @@ class CrunchClient
 		//Thread and work handle for io_context thread
 		std::thread					 client_thread_;	
 		boost::asio::executor_work_guard<boost::asio::io_context::executor_type>  client_work_;
+
+		//LOCAL TESTING ONLY
+		FILE* f ;
+		size_t inp_size;
+		size_t num_read;
+		
 };
 
 
